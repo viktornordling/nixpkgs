@@ -9687,6 +9687,8 @@ with pkgs;
 
   jump = callPackage ../tools/system/jump { };
 
+  lanzaboote-tool = callPackage ../tools/system/lanzaboote/tool.nix { };
+
   latex2html = callPackage ../tools/misc/latex2html { };
 
   lazycli = callPackage ../tools/misc/lazycli { };
