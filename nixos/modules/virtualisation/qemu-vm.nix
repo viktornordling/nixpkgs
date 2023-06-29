@@ -258,6 +258,7 @@ let
 
   storeImage = import ../../lib/make-disk-image.nix {
     inherit pkgs config lib;
+    name = "nix-store-image";
     additionalPaths = [ regInfo ];
     format = "qcow2";
     onlyNixStore = true;
