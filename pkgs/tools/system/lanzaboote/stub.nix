@@ -1,4 +1,4 @@
-{ rustPlatform, stdenv, lib, fetchFromGitHub }:
+{ rustPlatform, uefiLinker ? null, stdenv, lib, fetchFromGitHub }:
 
 rustPlatform.buildRustPackage
 rec {
@@ -15,7 +15,8 @@ rec {
   cargoHash = "sha256-uj7+X0mQxKfbLcSbg4SfHFyp2SHIymwBDzDFvJdcGD8=";
 
   # Necessary because our `cc-wrapper` doesn't understand MSVC link options.
-  RUSTFLAGS = "-Clinker=${stdenv.cc.bintools}/bin/${stdenv.cc.targetPrefix}ld.lld -Clinker-flavor=lld-link";
+  # RUSTFLAGS = "-Clinker=${stdenv.cc.bintools}/bin/${stdenv.cc.targetPrefix}lld-link";
+  RUSTFLAGS = if uefiLinker != null then "-Clinker=${uefiLinker}/bin/lld-link" else "";
   # Necessary because otherwise we will get (useless) hardening options in front of
   # -flavor link which will break the whole command-line processing for the ld.lld linker.
   hardeningDisable = [ "all" ];

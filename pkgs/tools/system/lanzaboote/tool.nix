@@ -11,23 +11,45 @@
 , lanzaboote-stub
 , lib
 , mkStdenvNoLibs
+, pkgsBuildTarget
+, buildPackages
+, overrideCC
+, writeShellScriptBin
 }:
 let
   uefiPlatform = lib.systems.elaborate "${stdenv.hostPlatform.qemuArch}-windows" // {
     rustc.config = "${stdenv.hostPlatform.qemuArch}-unknown-uefi";
+    useLLVM = true;
   };
-  uefiStdenv = mkStdenvNoLibs (stdenv.override (old: {
+  uefiLinker = writeShellScriptBin "lld-link" ''
+    exec ${buildPackages.llvmPackages_15.lld}/bin/lld-link "$@"
+    '';
+
+  uefiBintools = buildPackages.llvmPackages_15.clang.bintools.override {
+    extraBuildCommands = ''
+      wrap lld-link ${../../../build-support/bintools-wrapper/ld-wrapper.sh} ${uefiLinker}/bin/lld-link
+    '';
+  };
+
+  uefiCC = buildPackages.llvmPackages_15.clang; #.override {
+ #   bintools = uefiBintools;
+ # };
+
+  hostUefiStdenv = overrideCC (stdenv.override (old: {
+    targetPlatform = uefiPlatform;
+  })) uefiCC;
+  uefiStdenv = overrideCC (stdenv.override (old: {
     hostPlatform = uefiPlatform;
     targetPlatform = uefiPlatform;
+  })) uefiCC;
 
-    # cc = buildPackages.llvmPackages.clang;
-  }));
-  uefiRustc = rustc.override {
-    stdenv = uefiStdenv;
+  hostUefiRustc = rustc.override {
+    stdenv = hostUefiStdenv;
+    pkgsBuildTarget = pkgsBuildTarget // { targetPackages.stdenv = hostUefiStdenv; };
   };
   uefiRustPlatform = makeRustPlatform {
     stdenv = uefiStdenv;
-    rustc = uefiRustc;
+    rustc = hostUefiRustc;
     inherit cargo;
   };
 in
@@ -67,6 +89,7 @@ rustPlatform.buildRustPackage rec {
 
   passthru.stub = (lanzaboote-stub.override {
     rustPlatform = uefiRustPlatform;
+    uefiLinker = uefiLinker;
   });
 
   meta = with lib; {
