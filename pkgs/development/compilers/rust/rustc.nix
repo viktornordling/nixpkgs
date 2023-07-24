@@ -1,5 +1,6 @@
 { lib, stdenv, removeReferencesTo, pkgsBuildBuild, pkgsBuildHost, pkgsBuildTarget, targetPackages
 , llvmShared, llvmSharedForBuild, llvmSharedForHost, llvmSharedForTarget, llvmPackages
+, gcc-unwrapped
 , fetchurl, file, python3
 , darwin, cargo, cmake, rust, rustc
 , pkg-config, openssl, xz
@@ -144,6 +145,7 @@ in stdenv.mkDerivation rec {
 
   inherit patches;
 
+  NIX_DEBUG = 1;
   postPatch = ''
     patchShebangs src/etc
 
@@ -154,7 +156,7 @@ in stdenv.mkDerivation rec {
       -e '/probe_need CFG_CURL curl/d'
 
     # Useful debugging parameter
-    # export VERBOSE=1
+    export VERBOSE=1
   '' + lib.optionalString (stdenv.targetPlatform.isMusl && !stdenv.targetPlatform.isStatic) ''
     # Upstream rustc still assumes that musl = static[1].  The fix for
     # this is to disable crt-static by default for non-static musl
@@ -178,6 +180,9 @@ in stdenv.mkDerivation rec {
   dontUseCmakeConfigure = true;
 
   depsBuildBuild = [ pkgsBuildHost.stdenv.cc pkg-config ];
+
+  # LD_DEBUG = "libs";
+  LD_LIBRARY_PATH = lib.makeLibraryPath ([ xz.out ] ++ optional (!withBundledLLVM) llvmShared);
 
   nativeBuildInputs = [
     file python3 rustc cmake
