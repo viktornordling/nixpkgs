@@ -1,0 +1,12 @@
+diff --git a/src/tecla-util.c b/src/tecla-util.c
+index 64fe00fb86e060d567258e7f991c62a0a829e6ba..87c1a36f497a8921f50903c71c46cbb5840770c9 100644
+--- a/src/tecla-util.c
++++ b/src/tecla-util.c
+@@ -21,6 +21,7 @@
+ #include "tecla-util.h"
+ 
+ #include <gtk/gtk.h>
++#include <linux/limits.h>
+ 
+ struct xkb_context *
+ tecla_util_create_xkb_context (void)
