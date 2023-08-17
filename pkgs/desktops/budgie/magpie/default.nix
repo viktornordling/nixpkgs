@@ -64,6 +64,14 @@ stdenv.mkDerivation (finalAttrs: {
       url = "https://gitlab.gnome.org/GNOME/mutter/-/commit/285a5a4d54ca83b136b787ce5ebf1d774f9499d5.patch";
       sha256 = "/npUE3idMSTVlFptsDpZmGWjZ/d2gqruVlJKq4eF4xU=";
     })
+
+    # Remove support for window shading.
+    # The corresponding key was removed in gsettings-desktop-schemas 45.alpha.
+    # https://github.com/BuddiesOfBudgie/magpie/issues/9
+    (fetchpatch {
+      url = "https://github.com/BuddiesOfBudgie/magpie/commit/4177c466375462ca8ed8fdb60913df4422f19144.patch";
+      sha256 = "NVx40WDnlUL050D529KVohvNBdVrheXxmJ73U3+KSeQ=";
+    })
   ];
 
   mesonFlags = [
