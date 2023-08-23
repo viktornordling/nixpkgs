@@ -2,6 +2,7 @@
 , stdenv
 , substituteAll
 , fetchurl
+, fetchpatch
 , pkg-config
 , gettext
 , graphene
@@ -82,6 +83,13 @@ stdenv.mkDerivation rec {
   patches = [
     # https://github.com/NixOS/nixpkgs/pull/218143#issuecomment-1501059486
     ./patches/4.0-fix-darwin-build.patch
+
+    # Fixes "undefined symbol: gtk_printer_option_set"
+    # https://gitlab.gnome.org/GNOME/gtk/-/merge_requests/6250
+    (fetchpatch {
+      url = "https://gitlab.gnome.org/GNOME/gtk/-/commit/4d7277f72c8f4915f237e36982ffd7dfba524b15.patch";
+      sha256 = "nLNvrfrgF/Ssr2XUQDV8Qbszw5OUA4CnkZ6okrSlzOc=";
+    })
   ];
 
   depsBuildBuild = [
