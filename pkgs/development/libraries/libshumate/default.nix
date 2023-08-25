@@ -12,6 +12,7 @@
 , sqlite
 , libsoup_3
 , gtk4
+, libsysprof-capture
 , xvfb-run
 , gnome
 }:
@@ -46,6 +47,7 @@ stdenv.mkDerivation rec {
     sqlite
     libsoup_3
     gtk4
+    libsysprof-capture
   ];
 
   nativeCheckInputs = [
