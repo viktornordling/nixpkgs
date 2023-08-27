@@ -21,6 +21,7 @@
 , libXrender
 , xcbSupport ? x11Support
 , libxcb
+, writeText
 , testers
 }:
 
@@ -77,7 +78,19 @@ stdenv.mkDerivation (finalAttrs: {
     "-Dtests=disabled"
     (lib.mesonEnable "xlib" x11Support)
     (lib.mesonEnable "xcb" xcbSupport)
-  ];
+  ] ++ (
+    # The meson-cc-tests/ipc_rmid_deferred_release.c test program
+    # won't do its job when cross compiling.
+    let
+      crossFile = writeText "cross-file.conf" ''
+        [properties]
+        ipc_rmid_deferred_release = 'false'
+      '';
+    in
+    lib.optionals (stdenv.hostPlatform != stdenv.buildPlatform) [
+      "--cross-file=${crossFile}"
+    ]
+  );
 
   postPatch = ''
     patchShebangs version.py
